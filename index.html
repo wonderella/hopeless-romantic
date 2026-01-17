@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tales from a Hopeless Romantic</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Nunito:wght@300;600&family=Playfair+Display:ital,wght@1,500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-color: #fdf2f5;
+            --primary-pink: #ffcdd2;
+            --deep-red: #d32f2f;
+            --text-color: #5d4037;
+            --paper-color: #fffbfb;
+            --shadow: 0 4px 15px rgba(239, 154, 154, 0.4);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: radial-gradient(#ffdde1 1px, transparent 1px);
+            background-size: 20px 20px;
+            font-family: 'Nunito', sans-serif;
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* --- Header --- */
+        header {
+            text-align: center;
+            margin-top: 60px;
+            margin-bottom: 40px;
+            animation: fadeIn 2s ease;
+        }
+
+        h1 {
+            font-family: 'Dancing Script', cursive;
+            font-size: 3.5rem;
+            color: var(--deep-red);
+            text-shadow: 2px 2px 0px rgba(255, 255, 255, 0.8);
+        }
+
+        .subtitle {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-size: 1.1rem;
+            color: #8d6e63;
+            margin-top: 5px;
+            letter-spacing: 1px;
+        }
+
+        /* --- Grid Layout for Letters --- */
+        .letters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 40px;
+            width: 90%;
+            max-width: 1000px;
+            padding-bottom: 100px;
+        }
+
+        /* --- The Envelope Card --- */
+        .envelope-container {
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .envelope-container:hover {
+            transform: translateY(-10px) rotate(2deg);
+        }
+
+        .envelope {
+            background: var(--primary-pink);
+            height: 140px;
+            border-radius: 10px;
+            position: relative;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border: 2px solid #fff;
+        }
+
+        /* Envelope Flap Design using CSS Borders */
+        .envelope::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-left: 110px solid transparent;
+            border-right: 110px solid transparent;
+            border-top: 80px solid rgba(255, 255, 255, 0.6);
+            z-index: 2;
+        }
+
+        /* Wax Seal */
+        .seal {
+            position: absolute;
+            z-index: 3;
+            top: 60px;
+            background-color: var(--deep-red);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .seal i {
+            color: white;
+            font-size: 0.8rem;
+        }
+
+        .letter-label {
+            background: white;
+            padding: 8px 15px;
+            border-radius: 4px;
+            font-family: 'Dancing Script', cursive;
+            font-size: 1.4rem;
+            z-index: 4;
+            margin-top: 40px; /* Push below the flap */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            max-width: 90%;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* --- Floating Action Button (Add) --- */
+        .fab {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            background-color: var(--deep-red);
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: transform 0.3s;
+            border: none;
+            z-index: 100;
+        }
+
+        .fab:hover {
+            transform: scale(1.1) rotate(90deg);
+        }
+
+        /* --- Modals (Write & Read & Delete) --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 240, 245, 0.85);
+            backdrop-filter: blur(4px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .paper-modal {
+            background: var(--paper-color);
+            width: 90%;
+            max-width: 550px; /* Slightly wider for reading */
+            padding: 40px;
+            border-radius: 5px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            position: relative;
+            /* Lined paper effect */
+            background-image: linear-gradient(#999 0.05em, transparent 0.05em);
+            background-size: 100% 2em;
+            line-height: 2em;
+            max-height: 90vh; /* Ensure modal doesn't exceed screen height */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 1.5rem;
+            color: #aaa;
+            cursor: pointer;
+            background: none;
+            border: none;
+            z-index: 10;
+        }
+
+        .close-btn:hover {
+            color: var(--deep-red);
+        }
+
+        /* Inputs for Writing */
+        input.story-title-input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            font-family: 'Dancing Script', cursive;
+            font-size: 2rem;
+            color: var(--deep-red);
+            outline: none;
+            margin-bottom: 10px;
+        }
+
+        textarea.story-content-input {
+            width: 100%;
+            height: 350px; /* Taller writing area */
+            border: none;
+            background: transparent;
+            font-family: 'Nunito', sans-serif;
+            font-size: 1.1rem;
+            line-height: 2em;
+            color: var(--text-color);
+            outline: none;
+            resize: none;
+            margin-top: 8px;
+            /* Custom scrollbar for textarea */
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary-pink) transparent;
+        }
+
+        /* Read Mode Typography & Scrolling */
+        .read-title {
+            font-family: 'Dancing Script', cursive;
+            font-size: 2.5rem;
+            color: var(--deep-red);
+            margin-bottom: 20px;
+            text-align: center;
+            border-bottom: 2px solid var(--bg-color);
+            background: var(--paper-color);
+            flex-shrink: 0; /* Ensure title doesn't squish */
+        }
+
+        .read-content {
+            font-size: 1.1rem;
+            white-space: pre-wrap;
+            overflow-y: auto; /* Enable vertical scrolling */
+            max-height: 60vh; /* Limit height for scrolling */
+            padding-right: 15px; /* Avoid text hitting scrollbar */
+            margin-bottom: 15px;
+            /* Custom scrollbar styling for aesthetic */
+            scrollbar-width: thin;
+            scrollbar-color: var(--deep-red) var(--primary-pink);
+        }
+
+        /* Webkit scrollbar styling (Chrome/Safari) */
+        .read-content::-webkit-scrollbar,
+        textarea.story-content-input::-webkit-scrollbar {
+            width: 8px;
+        }
+        .read-content::-webkit-scrollbar-track,
+        textarea.story-content-input::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .read-content::-webkit-scrollbar-thumb,
+        textarea.story-content-input::-webkit-scrollbar-thumb {
+            background-color: var(--primary-pink);
+            border-radius: 10px;
+            border: 2px solid var(--paper-color);
+        }
+
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: auto; /* Push to bottom */
+            gap: 15px;
+            flex-shrink: 0;
+        }
+
+        .btn {
+            padding: 8px 20px;
+            border-radius: 20px;
+            border: none;
+            cursor: pointer;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--deep-red);
+            color: white;
+        }
+
+        .btn-delete {
+            background-color: transparent;
+            border: 1px solid var(--deep-red);
+            color: var(--deep-red);
+        }
+
+        .btn:hover {
+            opacity: 0.8;
+        }
+
+        /* --- Confirmation Modal Specifics --- */
+        .confirm-box {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            max-width: 400px;
+        }
+
+        .confirm-text {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: var(--text-color);
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #bcaaa4;
+            margin-top: 50px;
+            font-style: italic;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Tales from a Hopeless Romantic</h1>
+        <div class="subtitle">everything here is entirely fiction</div>
+    </header>
+
+    <div class="letters-grid" id="lettersGrid">
+        </div>
+
+    <button class="fab" onclick="openWriteModal()">
+        <i class="fas fa-pen"></i>
+    </button>
+
+    <div class="modal-overlay" id="writeModal">
+        <div class="paper-modal">
+            <button class="close-btn" onclick="closeModal('writeModal')">&times;</button>
+            <input type="text" id="newTitle" class="story-title-input" placeholder="Title of this fiction..." maxlength="30">
+            <textarea id="newContent" class="story-content-input" placeholder="Once upon a time..."></textarea>
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="saveStory()">Seal Letter</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="readModal">
+        <div class="paper-modal">
+            <button class="close-btn" onclick="closeModal('readModal')">&times;</button>
+            <div id="readTitle" class="read-title"></div>
+            <div id="readContent" class="read-content"></div>
+            <div class="modal-actions">
+                <button class="btn btn-delete" onclick="triggerDelete()">Burn Letter</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="deleteModal">
+        <div class="confirm-box">
+            <i class="fas fa-heart-broken" style="color: var(--deep-red); font-size: 2rem; margin-bottom: 15px;"></i>
+            <p class="confirm-text">Are you sure you're ready to let it go?</p>
+            <div class="modal-actions" style="justify-content: center;">
+                <button class="btn btn-primary" style="background-color: #aaa;" onclick="closeModal('deleteModal')">Not yet</button>
+                <button class="btn btn-primary" onclick="confirmDelete()">Yes, goodbye</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State Management
+        let stories = JSON.parse(localStorage.getItem('romanticStories')) || [];
+        let currentStoryId = null;
+
+        const grid = document.getElementById('lettersGrid');
+
+        // Initial Render
+        renderStories();
+
+        function renderStories() {
+            grid.innerHTML = '';
+            
+            if (stories.length === 0) {
+                grid.innerHTML = '<div class="empty-state">No stories written yet. The heart is waiting...</div>';
+                return;
+            }
+
+            stories.forEach(story => {
+                const letter = document.createElement('div');
+                letter.className = 'envelope-container';
+                letter.onclick = () => openReadModal(story.id);
+
+                // Adding a slight random rotation for "messy desk" aesthetic
+                const randomRotate = Math.floor(Math.random() * 6) - 3; 
+                letter.style.transform = `rotate(${randomRotate}deg)`;
+
+                letter.innerHTML = `
+                    <div class="envelope">
+                        <div class="seal"><i class="fas fa-heart"></i></div>
+                        <div class="letter-label">${story.title}</div>
+                    </div>
+                `;
+                grid.appendChild(letter);
+            });
+        }
+
+        // --- Write Modal Functions ---
+        function openWriteModal() {
+            document.getElementById('newTitle').value = '';
+            document.getElementById('newContent').value = '';
+            document.getElementById('writeModal').classList.add('modal-active');
+        }
+
+        function saveStory() {
+            const title = document.getElementById('newTitle').value.trim();
+            const content = document.getElementById('newContent').value.trim();
+
+            if (!title || !content) {
+                alert("A love letter cannot be empty...");
+                return;
+            }
+
+            const newStory = {
+                id: Date.now(),
+                title: title,
+                content: content,
+                date: new Date().toLocaleDateString()
+            };
+
+            stories.push(newStory);
+            localStorage.setItem('romanticStories', JSON.stringify(stories));
+            
+            closeModal('writeModal');
+            renderStories();
+        }
+
+        // --- Read Modal Functions ---
+        function openReadModal(id) {
+            const story = stories.find(s => s.id === id);
+            if (!story) return;
+
+            currentStoryId = id;
+            document.getElementById('readTitle').innerText = story.title;
+            document.getElementById('readContent').innerText = story.content;
+            document.getElementById('readModal').classList.add('modal-active');
+        }
+
+        // --- Delete Functions ---
+        function triggerDelete() {
+            // Close read modal, open confirmation
+            document.getElementById('readModal').classList.remove('modal-active');
+            document.getElementById('deleteModal').classList.add('modal-active');
+        }
+
+        function confirmDelete() {
+            stories = stories.filter(s => s.id !== currentStoryId);
+            localStorage.setItem('romanticStories', JSON.stringify(stories));
+            
+            closeModal('deleteModal');
+            renderStories();
+        }
+
+        // --- Generic Utility ---
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('modal-active');
+        }
+
+        // Close modal if clicking outside the paper
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal-overlay')) {
+                event.target.classList.remove('modal-active');
+            }
+        }
+    </script>
+</body>
+</html>
